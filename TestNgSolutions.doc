@@ -1,0 +1,98 @@
+How to order groups and run specific group and tests at start?
+Assume we have multiple classes One DeplyVM.java and FeatureTests.java
+
+DeplyVM.java : 
+/**
+ * Created by rajeshl on 6/9/2019.
+ */
+public class DeployVM {
+
+
+    @BeforeClass(alwaysRun = true)
+    public void setup(XmlTest config) throws Exception {
+        //Setup or initialization
+    }
+
+    /**
+     * @throws Exception
+     *
+     */
+    @Test(groups = {"CRITICAL_TEST" }, priority = 1)
+    public void deploy_vm_lab() throws Exception {
+        
+    }
+
+/**
+     * @throws Exception
+     *
+     */
+    @Test(groups = {"CRITICAL_TEST" }, priority = 2)
+    public void config_vm () throws Exception {
+        
+    }
+
+}
+
+FeatureTests.java:
+public class FeatureTests {
+
+
+    @BeforeClass(alwaysRun = true)
+    public void setup(XmlTest config) throws Exception {
+        //Setup or initialization
+    }
+
+    /**
+     * @throws Exception
+     *
+     */
+    @Test(groups = {"sanity" }, priority = 1)
+    public void featureTest1() throws Exception {
+        System.out.println("Feature One validated");
+    }
+
+    /**
+     * @throws Exception
+     *
+     */
+    @Test(groups = {"sanity" }, priority = 1)
+    public void featureTest2() throws Exception {
+        System.out.println("Feature Two validated");
+    }
+}
+
+testing.xml : Which run only the two groups [CRITICAL_TEST and sanity] and in order too. [ CRITICAL TEST will run first]
+
+Note: The depends-on will make CRTICAL_TEST group to run first and priority flag in class file make the tests to prioritize which one to run first.
+
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd" 
+[ 
+<!ENTITY commonparams  	SYSTEM "tests/testng-config/common/commonparams.xml">
+]
+>
+<suite name="sanity tests"  preserve-order="true">
+	&commonparams;
+
+<test name="RegressionTests" preserve-order="true">
+
+<parameter name="VM_HOSTNAME" value="qa-VM234" />
+		<parameter name="VM_IP" value="10.10.10.11" />
+		
+<groups>
+			<run>
+				<include name="CRITICAL_TEST" />
+				<include name="sanity" />
+			</run>
+			<dependencies>
+				<group name="sanity" depends-on="CRITICAL_TEST" />
+			</dependencies>
+		</groups>
+<classes>
+			<class name="DeployVM"></class>
+			<class name="FeatureTests" />
+		</classes>
+</test>
+</suite>
+
+
